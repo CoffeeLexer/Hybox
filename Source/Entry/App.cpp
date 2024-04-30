@@ -1,7 +1,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
-#include "Window/GLFW.h"
+#include "Window/Window.h"
 #include "Engine/Instance.h"
 #include "Engine/Device.h"
 #include "Engine/Carcass.h"
@@ -14,7 +14,7 @@ int main(int argc, char const *argv[])
     CreateDevice(carcass);
 
 
-    WindowGLFW w = WindowGLFW("App", 500, 500);
+    Window w = Window("App", 500, 500);
 
     while(w.IsActive())
     {

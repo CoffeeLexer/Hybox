@@ -1,5 +1,4 @@
 #include "Window.h"
-#include "GLFW.h"
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -35,7 +34,7 @@ static void GlobalTerminate()
         glfwTerminate();
 }
 
-WindowGLFW::WindowGLFW(const char* name, const uint32_t width, const uint32_t height)
+Window::Window(const char* name, const uint32_t width, const uint32_t height)
 {
     this->width = width;
     this->height = height;
@@ -49,23 +48,41 @@ WindowGLFW::WindowGLFW(const char* name, const uint32_t width, const uint32_t he
     glfwSwapInterval(1);
 }
 
-WindowGLFW::~WindowGLFW()
+Window::~Window()
 {
     glfwDestroyWindow(window);
     GlobalTerminate();
 }
 
-bool WindowGLFW::IsActive()
+bool Window::IsVulkanSupported()
+{
+    return GLFW_TRUE == glfwVulkanSupported();
+}
+
+std::vector<const char*> Window::GetVulkanEssentialExtensions()
+{
+    const char **extensions;
+    uint32_t extensionCount;
+    extensions = glfwGetRequiredInstanceExtensions(&extensionCount);
+    std::vector<const char*> ext;
+    ext.resize(extensionCount);
+    for(uint32_t i = 0; i < extensionCount; i++)
+        ext.push_back(extensions[i]);
+
+    return ext;
+}
+
+bool Window::IsActive()
 {
     return !glfwWindowShouldClose(window);
 }
 
-void WindowGLFW::PoolEvents()
+void Window::PoolEvents()
 {
     glfwPollEvents();
 }
 
-void WindowGLFW::SwapBuffers()
+void Window::SwapBuffers()
 {
     glfwSwapBuffers(window);
 }

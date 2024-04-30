@@ -3,7 +3,7 @@ set(APP_NAME HyboxApp)
 set(SOURCES
     Engine/Instance.cpp
     Engine/Device.cpp
-    Window/GLFW.cpp)
+    Window/Window.cpp)
 
 add_executable(${APP_NAME}
     ${SOURCES}
