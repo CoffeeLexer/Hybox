@@ -13,47 +13,59 @@ static void error_callback(int error, const char* description)
     fprintf(stderr, "Error: %s\n", description);
 }
 
-Window::Window(const char* name, const uint32_t width, const uint32_t height)
+static uint32_t counter = 0;
+
+static void GlobalInit()
+{
+    if(counter == 0)
+    {
+        if(!glfwInit())
+        {
+            fprintf(stderr, "GLFW INIT FAILED\n");
+            exit(1);
+        }
+    }
+    counter++;
+}
+
+static void GlobalTerminate()
+{
+    counter--;
+    if(counter == 0)
+        glfwTerminate();
+}
+
+WindowGLFW::WindowGLFW(const char* name, const uint32_t width, const uint32_t height)
 {
     this->width = width;
     this->height = height;
 
-    if (!glfwInit())
-    {
-        printf("GLFW INIT FAIL");
-        exit(1);
-    }
-
+    GlobalInit();
     glfwSetErrorCallback(error_callback);
     
-    SetInternal(new GLFW3Specific);
-    GLFW3Specific* specific = GetInternal<GLFW3Specific*>();
+    window = glfwCreateWindow(width, height, name, NULL, NULL);
 
-    specific->window = glfwCreateWindow(width, height, name, NULL, NULL);
-
-    glfwMakeContextCurrent(specific->window);
+    glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
 }
 
-Window::~Window()
+WindowGLFW::~WindowGLFW()
 {
-    GLFW3Specific* internal = GetInternal<GLFW3Specific*>();
-    glfwDestroyWindow(internal->window);
-    glfwTerminate();
-    delete internal;
+    glfwDestroyWindow(window);
+    GlobalTerminate();
 }
 
-bool Window::IsActive()
+bool WindowGLFW::IsActive()
 {
-    return !glfwWindowShouldClose(GetInternal<GLFW3Specific*>()->window);
+    return !glfwWindowShouldClose(window);
 }
 
-void Window::PoolEvents()
+void WindowGLFW::PoolEvents()
 {
     glfwPollEvents();
 }
 
-void Window::SwapBuffers()
+void WindowGLFW::SwapBuffers()
 {
-    glfwSwapBuffers(GetInternal<GLFW3Specific*>()->window);
+    glfwSwapBuffers(window);
 }

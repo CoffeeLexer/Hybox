@@ -1,6 +1,20 @@
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/Window)
+set(APP_NAME HyboxApp)
 
-add_executable(HyboxApp ${CMAKE_CURRENT_LIST_DIR}/Entry/App.cpp)
+set(SOURCES
+    Engine/Instance.cpp
+    Engine/Device.cpp
+    Window/GLFW.cpp)
 
-target_link_libraries(HyboxApp PUBLIC Window)
-target_include_directories(HyboxApp PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Window)
+add_executable(${APP_NAME}
+    ${SOURCES}
+    ${CMAKE_CURRENT_LIST_DIR}/Entry/App.cpp)
+
+find_package(glfw3 REQUIRED 3.3)
+find_package(Vulkan REQUIRED)
+
+target_link_libraries(${APP_NAME}
+    PUBLIC glfw
+    PUBLIC Vulkan::Vulkan)
+
+target_include_directories(${APP_NAME}
+    PRIVATE .)

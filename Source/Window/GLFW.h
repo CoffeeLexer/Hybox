@@ -3,7 +3,13 @@
 
 class GLFWwindow;
 
-struct GLFW3Specific
+class WindowGLFW : public Window
 {
-    GLFWwindow* window;
+    GLFWwindow *window;
+public:
+    WindowGLFW(const char* name, const uint32_t width, const uint32_t height);
+    ~WindowGLFW();
+    bool IsActive() override;
+    void PoolEvents() override;
+    void SwapBuffers() override;
 };
