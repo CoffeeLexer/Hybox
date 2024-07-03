@@ -2,5 +2,5 @@
 
 struct Carcass;
 
-void CreateInstance(Carcass &carcass);
-void DestroyInstance(Carcass &carcass);
+void CreateInstance(Carcass *carcass);
+void DestroyInstance(Carcass *carcass);

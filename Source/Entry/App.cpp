@@ -10,9 +10,9 @@ int main(int argc, char const *argv[])
 {
     printf("Startup!\n");
     Carcass carcass = {};
-    CreateInstance(carcass);
-    CreateDevice(carcass);
 
+    CreateInstance(&carcass);
+    CreateDevice(&carcass);
 
     Window w = Window("App", 500, 500);
 

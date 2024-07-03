@@ -3,6 +3,7 @@ set(APP_NAME HyboxApp)
 set(SOURCES
     Engine/Instance.cpp
     Engine/Device.cpp
+    Engine/DeviceQueue.cpp
     Engine/Whatchamacallit.cpp
     Window/Window.cpp)
 

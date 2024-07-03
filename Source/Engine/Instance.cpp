@@ -1,11 +1,13 @@
 #include "Instance.h"
 
 #include "Carcass.h"
+#include "Device.h"
 #include "Whatchamacallit.h"
 #include "Window/Window.h"
 
 #include <cstdio>
 #include <cstdlib>
+#include <cstdint>
 #include <vulkan/vulkan.h>
 
 #ifdef NDEBUG
@@ -19,7 +21,7 @@ const std::vector<const char*> validationLayers
     "VK_LAYER_KHRONOS_validation",
 };
 
-std::vector<const char*> GetAccessibleLayers()
+static std::vector<const char*> GetAccessibleLayers()
 {
     uint32_t count;
     vkEnumerateInstanceLayerProperties(&count, nullptr);
@@ -32,7 +34,7 @@ std::vector<const char*> GetAccessibleLayers()
     return names;
 }
 
-bool IsValidationLayerSupported()
+static bool IsValidationLayerSupported()
 {
     const auto accessible = GetAccessibleLayers();
     return ASubsetOfB(validationLayers, accessible);
@@ -58,7 +60,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(VkDebugUtilsMessageSeverity
     return true;
 }
 
-VkDebugUtilsMessengerCreateInfoEXT GetDebugMessengerCreateInfo()
+static VkDebugUtilsMessengerCreateInfoEXT GetDebugMessengerCreateInfo()
 {
     VkDebugUtilsMessengerCreateInfoEXT createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
@@ -77,7 +79,7 @@ VkDebugUtilsMessengerCreateInfoEXT GetDebugMessengerCreateInfo()
     return createInfo;
 }
 
-VkResult vkCreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger)
+static VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger)
 {
     auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
     if(func == nullptr)
@@ -86,7 +88,7 @@ VkResult vkCreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsM
     return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
 }
 
-void vkDestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT pDebugMessenger, const VkAllocationCallbacks* pAllocator)
+static void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT pDebugMessenger, const VkAllocationCallbacks* pAllocator)
 {
     auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
     if(func == nullptr)
@@ -95,33 +97,33 @@ void vkDestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerE
         func(instance, pDebugMessenger, pAllocator);
 }
 
-void CreateDebugMessengerInternal(Carcass &carcass)
+static void CreateDebugMessengerInternal(Carcass *carcass)
 {
-    auto &instance = carcass.instance;
-    auto &debugMessenger = carcass.debugMessenger;
+    auto &instance = carcass->instance;
+    auto &debugMessenger = carcass->debugMessenger;
     auto createInfo = GetDebugMessengerCreateInfo();
 
-    if(vkCreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS)
+    if(CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS)
     {
         fprintf(stderr, "CRITICAL: Failed to create debug messenger\n");
         exit(2);
     }
 }
 
-void DestroyDebugMessengerInternal(Carcass &carcass)
+static void DestroyDebugMessengerInternal(Carcass *carcass)
 {
-    auto &instance = carcass.instance;
-    auto &debugMessenger = carcass.debugMessenger;
+    auto &instance = carcass->instance;
+    auto &debugMessenger = carcass->debugMessenger;
 
-    vkDestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
+    DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
 
     debugMessenger = VK_NULL_HANDLE;
 }
 
 
-void CreateInstanceInternal(Carcass &carcass)
+static void CreateInstanceInternal(Carcass *carcass)
 {
-    auto &instance = carcass.instance;
+    auto &instance = carcass->instance;
 
     VkApplicationInfo appInfo{};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -175,18 +177,27 @@ void CreateInstanceInternal(Carcass &carcass)
     }
 }
 
+static void DestroyInstanceInternal(Carcass *carcass)
+{
+    auto &instance = carcass->instance;
 
-void CreateInstance(Carcass &carcass)
+    if (instance != VK_NULL_HANDLE)
+        vkDestroyInstance(instance, nullptr);
+}
+
+void CreateInstance(Carcass *carcass)
 {
     CreateInstanceInternal(carcass);
     if(enableValidationLayer && IsValidationLayerSupported())
         CreateDebugMessengerInternal(carcass);
 }
 
-void DestroyInstance(Carcass &carcass)
+void DestroyInstance(Carcass *carcass)
 {
-    // If not VK_NULL_HANDLE -> Destroy
-    if(enableValidationLayer && IsValidationLayerSupported())
+    DestroyDevice(carcass);
+
+    if (enableValidationLayer && IsValidationLayerSupported())
         DestroyDebugMessengerInternal(carcass);
-    vkDestroyInstance(carcass.instance, nullptr);
+
+    DestroyInstanceInternal(carcass);
 }

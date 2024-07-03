@@ -2,4 +2,5 @@
 
 struct Carcass;
 
-void CreateDevice(Carcass &carcass);
+void CreateDevice(Carcass *carcass);
+void DestroyDevice(Carcass *carcass);
