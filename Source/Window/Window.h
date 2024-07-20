@@ -4,6 +4,15 @@
 #include <vector>
 
 struct GLFWwindow;
+struct Carcass;
+
+enum class NativeWindowType : uint32_t
+{
+    Win32,
+    Cocoa,
+    X11,
+    Wayland,
+};
 
 class Window
 {
@@ -22,4 +31,7 @@ public:
     bool IsActive();
     void PoolEvents();
     void SwapBuffers();
+
+    template<NativeWindowType T>
+    void VkCreateSurface(Carcass *carcass);
 };

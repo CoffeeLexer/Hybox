@@ -180,6 +180,10 @@ static void CreateInstanceInternal(Carcass *carcass)
 static void DestroyInstanceInternal(Carcass *carcass)
 {
     auto &instance = carcass->instance;
+    auto &surface = carcass->surface;
+
+    if (surface != VK_NULL_HANDLE)
+        vkDestroySurfaceKHR(instance, surface, nullptr);
 
     if (instance != VK_NULL_HANDLE)
         vkDestroyInstance(instance, nullptr);

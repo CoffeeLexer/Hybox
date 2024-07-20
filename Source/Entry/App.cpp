@@ -14,12 +14,14 @@ int main(int argc, char const *argv[])
     CreateInstance(&carcass);
     CreateDevice(&carcass);
 
-    Window w = Window("App", 500, 500);
+    Window window = Window("App", 500, 500);
 
-    while(w.IsActive())
+    window.VkCreateSurface<NativeWindowType::Win32>(&carcass);
+
+    while(window.IsActive())
     {
-        w.PoolEvents();
-        w.SwapBuffers();
+        window.PoolEvents();
+        window.SwapBuffers();
     }
 
     printf("Clean Exit!\n");

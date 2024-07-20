@@ -1,11 +1,16 @@
 #include "Window.h"
 
-#define GLFW_INCLUDE_NONE
+#define VK_USE_PLATFORM_WIN32_KHR
+#define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3native.h>
 
 #include <cstdio>
 #include <cstdlib>
 #include <cstdint>
+
+#include "../Engine/Carcass.h"
 
 static void error_callback(int error, const char* description)
 {
@@ -68,6 +73,8 @@ std::vector<const char*> Window::GetVulkanEssentialExtensions()
     ext.resize(extensionCount);
     for(uint32_t i = 0; i < extensionCount; i++)
         ext.push_back(extensions[i]);
+    ext.push_back("VK_KHR_surface");
+    ext.push_back("VK_KHR_win32_surface");
 
     return ext;
 }
@@ -86,3 +93,17 @@ void Window::SwapBuffers()
 {
     glfwSwapBuffers(window);
 }
+
+template<>
+void Window::VkCreateSurface<NativeWindowType::Win32>(Carcass *carcass)
+{
+    auto &instance = carcass->instance;
+    auto &surface = carcass->surface;
+
+    if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS)
+    {
+        fprintf(stderr, "CRITICAL: Failed to create window surface");
+        exit(2);
+    }
+}
+
