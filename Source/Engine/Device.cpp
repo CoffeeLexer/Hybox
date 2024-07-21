@@ -7,6 +7,8 @@
 #include <cstdio>
 #include <cstdint>
 #include <vector>
+#include <tuple>
+#include <functional>
 
 static uint32_t RatePhysicalDevice(const VkPhysicalDevice &device)
 {
@@ -105,15 +107,27 @@ void CreateDevice(Carcass *carcass)
 
     QueueFamilyIndices family = FindQueueFamily(carcass);
 
-    VkDeviceQueueCreateInfo queueCreateInfo{};
-    queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-    queueCreateInfo.queueFamilyIndex = family.graphics.value();
-    queueCreateInfo.queueCount = 1;
-    float queuePriority = 1.0f;
-    queueCreateInfo.pQueuePriorities = &queuePriority;
+    std::vector<VkDeviceQueueCreateInfo> queueInfos{};
+    std::vector<std::tuple<uint32_t, std::reference_wrapper<VkQueue>>> constructInfo =
+    {
+        {family.graphics.value(), std::ref(carcass->graphicsQueue)},
+        {family.present.value(), std::ref(carcass->presentQueue)},
+    };
 
-    deviceCreateInfo.queueCreateInfoCount = 1;
-    deviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;
+    float queuePriority = 1.0f;
+    for (const auto& info : constructInfo)
+    {
+        VkDeviceQueueCreateInfo queueCreateInfo{};
+        queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        queueCreateInfo.queueFamilyIndex = std::get<0>(info);
+        queueCreateInfo.queueCount = 1;
+        queueCreateInfo.pQueuePriorities = &queuePriority;
+
+        queueInfos.push_back(queueCreateInfo);
+    }
+
+    deviceCreateInfo.queueCreateInfoCount = static_cast<uint32_t>(queueInfos.size());
+    deviceCreateInfo.pQueueCreateInfos = queueInfos.data();
 
     deviceCreateInfo.enabledLayerCount = 0;
     deviceCreateInfo.ppEnabledLayerNames = nullptr;
@@ -126,8 +140,8 @@ void CreateDevice(Carcass *carcass)
 
     vkCreateDevice(physicalDevice, &deviceCreateInfo, nullptr, &device);
 
-    auto &graphicsQueue = carcass->graphicsQueue;
-    vkGetDeviceQueue(device, family.graphics.value(), 0, &graphicsQueue);
+    for (uint32_t i = 0; i < constructInfo.size(); i++)
+        vkGetDeviceQueue(device, std::get<0>(constructInfo[i]), 0, &std::get<1>(constructInfo[i]).get());
 }
 
 void DestroyDevice(Carcass *carcass)

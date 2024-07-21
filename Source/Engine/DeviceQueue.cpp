@@ -8,6 +8,7 @@
 QueueFamilyIndices FindQueueFamily(Carcass *carcass)
 {
     auto &physicalDevice = carcass->physicalDevice;
+    auto &surface = carcass->surface;
 
     uint32_t familyCount = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &familyCount, nullptr);
@@ -27,6 +28,12 @@ QueueFamilyIndices FindQueueFamily(Carcass *carcass)
 
         if (flags & VK_QUEUE_COMPUTE_BIT)
             indices.compute = i;
+
+        VkBool32 presentSupport = false;
+        vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, surface, &presentSupport);
+
+        if (presentSupport == VK_TRUE)
+            indices.present = i;
 
         if (indices.isComplete())
             break;

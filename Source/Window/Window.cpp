@@ -47,6 +47,7 @@ Window::Window(const char* name, const uint32_t width, const uint32_t height)
     GlobalInit();
     glfwSetErrorCallback(error_callback);
     
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     window = glfwCreateWindow(width, height, name, NULL, NULL);
 
     glfwMakeContextCurrent(window);

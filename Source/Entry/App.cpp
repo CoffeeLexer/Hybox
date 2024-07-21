@@ -12,11 +12,10 @@ int main(int argc, char const *argv[])
     Carcass carcass = {};
 
     CreateInstance(&carcass);
-    CreateDevice(&carcass);
-
     Window window = Window("App", 500, 500);
-
     window.VkCreateSurface<NativeWindowType::Win32>(&carcass);
+    
+    CreateDevice(&carcass);
 
     while(window.IsActive())
     {

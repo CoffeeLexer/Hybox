@@ -10,9 +10,10 @@ struct QueueFamilyIndices
     std::optional<uint32_t> transfer{};
     std::optional<uint32_t> graphics{};
     std::optional<uint32_t> compute{};
+    std::optional<uint32_t> present{};
     bool isComplete()
     {
-        return transfer && graphics && compute;
+        return transfer && graphics && compute && present;
     }
 };
 
