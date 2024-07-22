@@ -9,6 +9,22 @@
 #include <vector>
 #include <set>
 
+static bool physicalDeviceSupportsExtentions(const VkPhysicalDevice physicalDevice)
+{
+    uint32_t extensionCount;
+    vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, nullptr);
+
+    std::vector<VkExtensionProperties> availibleExtensions(extensionCount);
+    vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, availibleExtensions.data());
+
+    std::set<std::string> requiredVector(requiredDeviceExtensions, requiredDeviceExtensions + sizeof(requiredDeviceExtensions) / sizeof(requiredDeviceExtensions[0]));
+
+    for (const auto& extension : availibleExtensions)
+        requiredVector.erase(extension.extensionName); 
+
+    return requiredVector.empty();
+}
+
 static uint32_t RatePhysicalDevice(const VkPhysicalDevice &device)
 {
     VkPhysicalDeviceProperties properties;
