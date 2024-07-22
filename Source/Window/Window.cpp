@@ -50,8 +50,8 @@ Window::Window(const char* name, const uint32_t width, const uint32_t height)
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     window = glfwCreateWindow(width, height, name, NULL, NULL);
 
-    glfwMakeContextCurrent(window);
-    glfwSwapInterval(1);
+    // glfwMakeContextCurrent(window);
+    // glfwSwapInterval(1);
 }
 
 Window::~Window()
@@ -92,7 +92,7 @@ void Window::PoolEvents()
 
 void Window::SwapBuffers()
 {
-    glfwSwapBuffers(window);
+    //glfwSwapBuffers(window);
 }
 
 template<>

@@ -7,8 +7,7 @@
 #include <cstdio>
 #include <cstdint>
 #include <vector>
-#include <tuple>
-#include <functional>
+#include <set>
 
 static uint32_t RatePhysicalDevice(const VkPhysicalDevice &device)
 {
@@ -108,18 +107,18 @@ void CreateDevice(Carcass *carcass)
     QueueFamilyIndices family = FindQueueFamily(carcass);
 
     std::vector<VkDeviceQueueCreateInfo> queueInfos{};
-    std::vector<std::tuple<uint32_t, std::reference_wrapper<VkQueue>>> constructInfo =
+    std::set<uint32_t> createQueueList =
     {
-        {family.graphics.value(), std::ref(carcass->graphicsQueue)},
-        {family.present.value(), std::ref(carcass->presentQueue)},
+        family.graphics.value(),
+        family.present.value(),
     };
 
     float queuePriority = 1.0f;
-    for (const auto& info : constructInfo)
+    for (const auto& index : createQueueList)
     {
         VkDeviceQueueCreateInfo queueCreateInfo{};
         queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-        queueCreateInfo.queueFamilyIndex = std::get<0>(info);
+        queueCreateInfo.queueFamilyIndex = index;
         queueCreateInfo.queueCount = 1;
         queueCreateInfo.pQueuePriorities = &queuePriority;
 
@@ -140,8 +139,11 @@ void CreateDevice(Carcass *carcass)
 
     vkCreateDevice(physicalDevice, &deviceCreateInfo, nullptr, &device);
 
-    for (uint32_t i = 0; i < constructInfo.size(); i++)
-        vkGetDeviceQueue(device, std::get<0>(constructInfo[i]), 0, &std::get<1>(constructInfo[i]).get());
+    auto &graphicsQueue = carcass->graphicsQueue;
+    auto &presentQueue = carcass->presentQueue;
+
+    vkGetDeviceQueue(device, family.graphics.value(), 0, &graphicsQueue);
+    vkGetDeviceQueue(device, family.present.value(), 0, &presentQueue);
 }
 
 void DestroyDevice(Carcass *carcass)
