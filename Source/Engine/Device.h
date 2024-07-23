@@ -2,10 +2,9 @@
 
 struct Carcass;
 
-static const char*[] requiredDeviceExtensions =
+static const char* requiredDeviceExtensions[] =
 {
-    VK_KHR_SURFACE_EXTENSION_NAME,
-    VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+    "VK_KHR_swapchain",
 };
 
 void CreateDevice(Carcass *carcass);

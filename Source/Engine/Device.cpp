@@ -2,12 +2,14 @@
 
 #include "Carcass.h"
 #include "DeviceQueue.h"
+#include "Whatchamacallit.h"
 
 #include <vulkan/vulkan.h>
 #include <cstdio>
 #include <cstdint>
 #include <vector>
 #include <set>
+#include <string>
 
 static bool physicalDeviceSupportsExtentions(const VkPhysicalDevice physicalDevice)
 {
@@ -17,12 +19,12 @@ static bool physicalDeviceSupportsExtentions(const VkPhysicalDevice physicalDevi
     std::vector<VkExtensionProperties> availibleExtensions(extensionCount);
     vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, availibleExtensions.data());
 
-    std::set<std::string> requiredVector(requiredDeviceExtensions, requiredDeviceExtensions + sizeof(requiredDeviceExtensions) / sizeof(requiredDeviceExtensions[0]));
+    auto required = std::set<std::string>(requiredDeviceExtensions, requiredDeviceExtensions + sizeof(requiredDeviceExtensions) / sizeof(requiredDeviceExtensions[0]));
 
     for (const auto& extension : availibleExtensions)
-        requiredVector.erase(extension.extensionName); 
+        required.erase(extension.extensionName); 
 
-    return requiredVector.empty();
+    return required.empty();
 }
 
 static uint32_t RatePhysicalDevice(const VkPhysicalDevice &device)
@@ -147,8 +149,8 @@ void CreateDevice(Carcass *carcass)
     deviceCreateInfo.enabledLayerCount = 0;
     deviceCreateInfo.ppEnabledLayerNames = nullptr;
 
-    deviceCreateInfo.enabledExtensionCount = 0;
-    deviceCreateInfo.ppEnabledExtensionNames = nullptr;
+    deviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(sizeof(requiredDeviceExtensions) / sizeof(requiredDeviceExtensions[0]));
+    deviceCreateInfo.ppEnabledExtensionNames = requiredDeviceExtensions;
 
     VkPhysicalDeviceFeatures deviceFeatures{};
     deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
