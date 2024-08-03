@@ -5,6 +5,7 @@ set(SOURCES
     Engine/Device.cpp
     Engine/DeviceQueue.cpp
     Engine/Whatchamacallit.cpp
+    Engine/Swapchain.cpp
     Window/Window.cpp)
 
 add_executable(${APP_NAME}
