@@ -69,22 +69,39 @@ class Swapchain
 
     VkPresentModeKHR GetPresentMode()
     {
-        const std::vector<uint32_t> rankedModes
+        const VkPresentModeKHR ranks[] =
         {
             // Best
             VK_PRESENT_MODE_MAILBOX_KHR,
             VK_PRESENT_MODE_FIFO_KHR,
-            VK_PRESENT_MODE_IMMEDIATE_KHR,
             VK_PRESENT_MODE_FIFO_RELAXED_KHR,
+            VK_PRESENT_MODE_IMMEDIATE_KHR,
             // Worst
         };
+        const uint32_t count = sizeof(ranks) / sizeof(ranks[0]);
 
-        uint32_t best = -1;
+        uint32_t best = count;
         for (const auto& mode : presentModes)
         {
-            auto test = std::find(rankedModes.begin(), rankedModes.end(), mode);
-            best = test == rankedModes.end() ? best : *test;
+            uint32_t distance = 0;
+            for (; distance < count; distance++)
+                if (ranks[distance] == mode) break;
+
+            best = std::min(best, distance);
         }
-        if 
+        if (best == count) 
+        {
+            printf("WARN: Using unknown present mode\n");
+            return presentModes[0];
+        }
+        return ranks[best];
+    }
+
+    VkExtent2D GetSwapExtent()
+    {
+        if (static_cast<uint32_t>(capabilities.currentExtent.width) == static_cast<uint32_t>(-1))
+        {
+            
+        }
     }
 };
